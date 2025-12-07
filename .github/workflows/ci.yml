@@ -64,4 +64,3 @@ jobs:
 
       - name: Run mypy
         run: mypy llm_fs_tools/ --ignore-missing-imports
-        continue-on-error: true

@@ -1,6 +1,7 @@
 """
 Platform-specific secure file opening.
 """
+import errno
 import os
 import platform
 from pathlib import Path
@@ -32,7 +33,7 @@ def secure_open_unix(path: Path, flags: int) -> Tuple[int, Path]:
     try:
         fd = os.open(str(path), flags | os.O_NOFOLLOW)
     except OSError as e:
-        if e.errno == 40:  # ELOOP
+        if e.errno == errno.ELOOP:
             raise SecurityError(f"Symlink detected: {path}")
         raise
 
@@ -55,9 +56,15 @@ def secure_open_unix(path: Path, flags: int) -> Tuple[int, Path]:
             return fd, Path(real_path)
 
         else:
-            # Other Unix - use fstat and original path
-            # (Not perfect but good enough for BSD)
-            return fd, path.resolve(strict=True)
+            # Other Unix - verify via inode matching to prevent TOCTOU
+            fd_stat = os.fstat(fd)
+            resolved = path.resolve(strict=True)
+            path_stat = resolved.stat()
+            if (fd_stat.st_ino != path_stat.st_ino or
+                    fd_stat.st_dev != path_stat.st_dev):
+                os.close(fd)
+                raise SecurityError("FD/path mismatch - possible TOCTOU")
+            return fd, resolved
 
     except Exception as e:
         os.close(fd)
@@ -122,6 +129,8 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
         raise SecurityError(f"Symlink/junction detected: {path}")
 
     # Convert to Python FD
+    # Note: open_osfhandle transfers handle ownership to the FD
+    # Closing the FD will also close the underlying Windows handle
     fd = msvcrt.open_osfhandle(handle, flags)
 
     # Get canonical path using GetFinalPathNameByHandle
@@ -137,9 +146,12 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
         os.close(fd)
         raise OSError("GetFinalPathNameByHandle failed")
 
-    # Remove \\?\ prefix if present
+    # Remove \\?\ or \\?\UNC\ prefix if present
     real_path_str = path_buffer.value
-    if real_path_str.startswith('\\\\?\\'):
+    if real_path_str.startswith('\\\\?\\UNC\\'):
+        # Convert \\?\UNC\server\share to \\server\share
+        real_path_str = '\\\\' + real_path_str[8:]
+    elif real_path_str.startswith('\\\\?\\'):
         real_path_str = real_path_str[4:]
 
     return fd, Path(real_path_str)

@@ -283,7 +283,7 @@ class ChunkedProcessor:
                 result = processor(line, line_num)
                 if result is not None:
                     results.append(result)
-                line_count = line_num
+                line_count += 1
 
             return {
                 "success": True,

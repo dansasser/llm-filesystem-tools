@@ -79,7 +79,7 @@ def read_file_secure(
         # Create minimal policy for single-root use
         policy = FileSystemPolicy(
             allowed_roots=[repo_root],
-            max_file_size_mb=max_bytes / (1024 * 1024) + 1,  # Add margin
+            max_file_size_mb=(max_bytes / (1024 * 1024)) * 1.1,  # 10% margin
             blocked_patterns=[],  # Allow all patterns for compatibility
             blocked_extensions=[]
         )
@@ -91,11 +91,11 @@ def read_file_secure(
             content = result["data"]["content"]
 
             # Enforce byte limit and add truncation indicator
-            content_bytes = content.encode(encoding, errors='replace')
-            if len(content_bytes) > max_bytes:
-                # Truncate and decode back
-                truncated_bytes = content_bytes[:max_bytes]
-                content = truncated_bytes.decode(encoding, errors='replace')
+            # Use character-safe truncation to avoid corrupting multibyte UTF-8
+            if len(content.encode(encoding)) > max_bytes:
+                # Truncate at character boundary
+                while len(content.encode(encoding)) > max_bytes and content:
+                    content = content[:-1]
                 content += "\n\n[TRUNCATED: file larger than max_bytes]\n"
 
             return {
@@ -164,7 +164,13 @@ def read_limited(
 
     Returns:
         (content, was_truncated)
+
+    Raises:
+        ValueError: If max_bytes <= 0
     """
+    if max_bytes <= 0:
+        raise ValueError("max_bytes must be positive")
+
     os.lseek(self.fd, 0, os.SEEK_SET)
 
     # Read up to max_bytes

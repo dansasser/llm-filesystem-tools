@@ -282,7 +282,14 @@ class FileSystemTools:
                                 })
                             elif entry.is_dir():
                                 # Check if child directory is within allowed roots
-                                if self.policy._is_within_roots(entry, self.policy.allowed_roots):
+                                # SECURITY: Resolve to real path to prevent symlink bypass
+                                # A symlink inside allowed roots pointing outside must be blocked
+                                try:
+                                    real_entry = entry.resolve()
+                                except OSError:
+                                    # Can't resolve - skip this entry
+                                    continue
+                                if self.policy._is_within_roots(real_entry, self.policy.allowed_roots):
                                     subtree = build_tree(entry, current_depth + 1)
                                     tree["children"].append(subtree)
                         except (OSError, PermissionError):

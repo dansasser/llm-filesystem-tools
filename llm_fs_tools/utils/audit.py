@@ -224,6 +224,9 @@ class MemoryAuditLogger(AuditLogger):
             "type": "warning",
             "message": message
         })
+        # Trim if over limit
+        if len(self.entries) > self.max_entries:
+            self.entries = self.entries[-self.max_entries:]
 
     def log_error(self, message: str) -> None:
         """Store error in memory."""
@@ -232,6 +235,9 @@ class MemoryAuditLogger(AuditLogger):
             "type": "error",
             "message": message
         })
+        # Trim if over limit
+        if len(self.entries) > self.max_entries:
+            self.entries = self.entries[-self.max_entries:]
 
     def log_security_event(
         self,
@@ -247,6 +253,9 @@ class MemoryAuditLogger(AuditLogger):
             "path": path,
             "description": description
         })
+        # Trim if over limit
+        if len(self.entries) > self.max_entries:
+            self.entries = self.entries[-self.max_entries:]
 
     def get_entries(self) -> list[dict]:
         """
