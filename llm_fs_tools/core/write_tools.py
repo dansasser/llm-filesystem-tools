@@ -10,7 +10,6 @@ Requires explicit permission via FileSystemPolicy(allow_write=True).
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 from .security import FileSystemPolicy
 from ..exceptions import SecurityError
@@ -108,7 +107,7 @@ class FileSystemWriteTools:
             if create_dirs:
                 # Verify parent would be within writable roots
                 if not self.policy.can_write(file_path.parent / "dummy"):
-                    raise SecurityError(f"Cannot create directories outside writable roots")
+                    raise SecurityError("Cannot create directories outside writable roots")
                 file_path.parent.mkdir(parents=True, exist_ok=True)
             elif not file_path.parent.exists():
                 raise SecurityError(
@@ -140,7 +139,7 @@ class FileSystemWriteTools:
                 # Atomic rename (POSIX guarantees atomicity)
                 tmp_path.replace(file_path)
 
-            except Exception as e:
+            except Exception:
                 # Clean up temp file on error
                 if fd is not None:
                     try:
@@ -177,7 +176,7 @@ class FileSystemWriteTools:
                 "error": str(e),
                 "metadata": {"tool": "write_file", "path": str(path)}
             }
-        except PermissionError as e:
+        except PermissionError:
             return {
                 "success": False,
                 "error": f"Permission denied: {path}",
