@@ -40,6 +40,15 @@ from .utils.audit import AuditLogger, NullAuditLogger, MemoryAuditLogger
 from .utils.streaming import StreamingFileReader, ChunkedProcessor
 from .exceptions import SecurityError, ValidationError
 
+# Compatibility layer for ollama-prompt integration
+from .compat import (
+    read_file_secure,
+    secure_open as secure_open_compat,
+    create_directory_tools,
+    safe_read_file,
+    DEFAULT_MAX_FILE_BYTES,
+)
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -67,4 +76,11 @@ __all__ = [
     "MemoryAuditLogger",
     "StreamingFileReader",
     "ChunkedProcessor",
+
+    # Compatibility layer (ollama-prompt drop-in replacements)
+    "read_file_secure",
+    "secure_open_compat",
+    "create_directory_tools",
+    "safe_read_file",
+    "DEFAULT_MAX_FILE_BYTES",
 ]

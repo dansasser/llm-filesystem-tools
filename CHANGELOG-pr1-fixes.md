@@ -307,3 +307,59 @@ After all fixes complete:
 2. Integration testing with ollama-prompt
 3. Merge to main
 4. PyPI publish
+
+---
+
+## Phase 1: Compatibility Layer (COMPLETED 2025-12-06)
+
+### New Files Created
+
+**`llm_fs_tools/compat.py`** - ollama-prompt compatibility layer
+
+### New Functions
+
+| Function | Description | Signature |
+|----------|-------------|-----------|
+| `read_file_secure()` | Drop-in replacement for ollama-prompt | `(path, repo_root=".", max_bytes=200000, audit=True) -> Dict` |
+| `secure_open_compat()` | Secure open returning fd | `(path, repo_root=".", audit=True) -> Dict` |
+| `create_directory_tools()` | Factory for directory access | `(directory, allow_write=False, ...) -> FileSystemTools` |
+| `safe_read_file()` | Alias for read_file_secure | Same as read_file_secure |
+
+### Return Format (matches ollama-prompt exactly)
+
+**read_file_secure success:**
+```python
+{"ok": True, "path": str, "content": str}
+```
+
+**read_file_secure failure:**
+```python
+{"ok": False, "path": str, "error": str}
+```
+
+**secure_open_compat success:**
+```python
+{"ok": True, "fd": int, "path": str, "resolved_path": str, "size": int}
+```
+
+**secure_open_compat failure:**
+```python
+{"ok": False, "path": str, "error": str, "blocked_reason": str}
+```
+
+### Tests Added
+
+**`tests/unit/test_compat.py`** - 22 tests covering:
+- read_file_secure() success/failure/truncation
+- secure_open_compat() success/failure/fd handling
+- create_directory_tools() read-only and write modes
+- Symlink blocking (Unix)
+- Return format verification
+
+### Test Results
+
+```
+156 passed, 2 skipped in 0.56s
+```
+
+(2 skipped: symlink tests on Windows require admin)
