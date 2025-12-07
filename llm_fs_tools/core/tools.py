@@ -9,11 +9,26 @@ Provides secure, TOCTOU-resistant file system access with:
 """
 import re
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional, TypedDict
 
 from .security import FileSystemPolicy
 from .file_handle import open_secure
 from ..exceptions import SecurityError
+
+
+class DirectoryEntry(TypedDict):
+    name: str
+    type: str
+    size: int | None
+
+
+class DirectoryTreeNode(TypedDict, total=False):
+    name: str
+    type: str
+    size: int
+    children: List["DirectoryTreeNode"]
+    truncated: bool
+    error: str
 
 
 class FileSystemTools:
@@ -143,7 +158,7 @@ class FileSystemTools:
             if not dir_path.is_dir():
                 raise SecurityError(f"Not a directory: {dir_path}")
 
-            entries = []
+            entries: List[DirectoryEntry] = []
             for entry in dir_path.iterdir():
                 if not include_hidden and entry.name.startswith('.'):
                     continue
@@ -246,12 +261,13 @@ class FileSystemTools:
             # Track total entries for limit enforcement
             entry_count = [0]  # Use list for mutable closure
 
-            def build_tree(current_path: Path, current_depth: int) -> dict:
+            def build_tree(current_path: Path, current_depth: int) -> DirectoryTreeNode:
                 """Recursively build directory tree."""
-                tree = {
+                children: List[DirectoryTreeNode] = []
+                tree: DirectoryTreeNode = {
                     "name": current_path.name or str(current_path),
                     "type": "directory",
-                    "children": []
+                    "children": children
                 }
 
                 # Stop at max depth
@@ -273,7 +289,7 @@ class FileSystemTools:
 
                         try:
                             if entry.is_file():
-                                tree["children"].append({
+                                children.append({
                                     "name": entry.name,
                                     "type": "file",
                                     "size": entry.stat().st_size
@@ -289,7 +305,7 @@ class FileSystemTools:
                                     continue
                                 if self.policy._is_within_roots(real_entry, self.policy.allowed_roots):
                                     subtree = build_tree(entry, current_depth + 1)
-                                    tree["children"].append(subtree)
+                                    children.append(subtree)
                         except (OSError, PermissionError):
                             # Skip entries we can't access
                             continue
