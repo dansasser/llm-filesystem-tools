@@ -397,6 +397,27 @@ After all fixes complete:
 
 ---
 
+## Additional PR Review Fixes (COMPLETED 2025-12-06)
+
+### Commit: `9666fdb`
+
+| File | Fix Applied |
+|------|-------------|
+| `llm_fs_tools/core/tools.py` | Removed unused imports (os, fnmatch, Any) |
+| `llm_fs_tools/platform/secure_open.py` | Removed unnecessary f-string |
+| `llm_fs_tools/utils/streaming.py` | Removed unused Optional import |
+| `llm_fs_tools/compat.py` | Fixed to read bytes instead of characters for max_bytes |
+| `docs/implementation-plan-v5.01.md` | Added max_bytes validation to read_limited() |
+| `docs/implementation-plan-v5.01.md` | Changed to 10% margin + character-safe truncation |
+
+### Test Results
+
+```
+156 passed, 2 skipped in 0.59s
+```
+
+---
+
 ## Remaining Phases
 
 | Phase | Description | Status |
