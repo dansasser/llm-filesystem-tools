@@ -9,7 +9,7 @@ Provides memory-efficient reading of large files with:
 """
 import os
 from pathlib import Path
-from typing import Iterator, Optional, Union
+from typing import Iterator, Union
 
 from ..core.security import FileSystemPolicy
 from ..core.file_handle import open_secure

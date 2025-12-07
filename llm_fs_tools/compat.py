@@ -212,15 +212,21 @@ def read_file_secure(
     fd_closed = False
 
     try:
-        # Step 2: Read content from file descriptor
-        # Wrap FD in a file object for convenient reading
+        # Step 2: Read content from file descriptor in BINARY mode
+        # This ensures max_bytes limits actual bytes, not characters
         # Note: os.fdopen takes ownership of fd and closes it on exit
-        with os.fdopen(fd, "r", encoding="utf-8", errors="replace") as f:
+        with os.fdopen(fd, "rb") as f:
             fd_closed = True  # fdopen now owns the fd
-            content = f.read(max_bytes)
+            bytes_read = f.read(max_bytes)
 
-        # Step 3: Add truncation notice if needed
-        if file_size > len(content.encode('utf-8')):
+        # Detect truncation by comparing file_size to bytes actually read
+        truncated = file_size > len(bytes_read)
+
+        # Decode with safe handling for invalid UTF-8 sequences
+        content = bytes_read.decode("utf-8", errors="replace")
+
+        # Step 3: Add truncation notice if file was truncated
+        if truncated:
             content += "\n\n[TRUNCATED: file larger than max_bytes]\n"
 
         return {

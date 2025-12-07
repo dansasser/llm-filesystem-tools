@@ -267,9 +267,20 @@ def read_limited(
     """
     Read file with byte limit and truncation indicator.
 
+    Args:
+        max_bytes: Maximum bytes to read (must be positive)
+        encoding: Text encoding for decoding
+        truncation_marker: Text appended when file is truncated
+
     Returns:
         (content, was_truncated)
+
+    Raises:
+        ValueError: If max_bytes is not a positive integer
     """
+    if max_bytes <= 0:
+        raise ValueError("max_bytes must be positive")
+
     os.lseek(self.fd, 0, os.SEEK_SET)
     data = os.read(self.fd, max_bytes)
     extra = os.read(self.fd, 1)
@@ -309,7 +320,7 @@ def read_file_secure(
     try:
         policy = FileSystemPolicy(
             allowed_roots=[repo_root],
-            max_file_size_mb=max_bytes / (1024 * 1024) + 1,
+            max_file_size_mb=(max_bytes / (1024 * 1024)) * 1.1,  # 10% margin
             blocked_patterns=[],
             blocked_extensions=[]
         )
@@ -319,11 +330,12 @@ def read_file_secure(
 
         if result["success"]:
             content = result["data"]["content"]
-            content_bytes = content.encode(encoding, errors='replace')
 
-            if len(content_bytes) > max_bytes:
-                truncated_bytes = content_bytes[:max_bytes]
-                content = truncated_bytes.decode(encoding, errors='replace')
+            # Character-safe truncation: reduce by characters until byte length fits
+            # This prevents splitting multibyte UTF-8 characters
+            if len(content.encode(encoding)) > max_bytes:
+                while len(content.encode(encoding)) > max_bytes and content:
+                    content = content[:-1]
                 content += "\n\n[TRUNCATED: file larger than max_bytes]\n"
 
             return {

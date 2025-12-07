@@ -121,7 +121,7 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
     file_info = BY_HANDLE_FILE_INFORMATION()
     if not kernel32.GetFileInformationByHandle(handle, ctypes.byref(file_info)):
         kernel32.CloseHandle(handle)
-        raise OSError(f"GetFileInformationByHandle failed")
+        raise OSError("GetFileInformationByHandle failed")
 
     # Check if reparse point
     if file_info.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT:

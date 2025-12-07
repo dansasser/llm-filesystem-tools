@@ -7,11 +7,9 @@ Provides secure, TOCTOU-resistant file system access with:
 - get_directory_tree: Hierarchical directory structure
 - search_codebase: Grep-style pattern search
 """
-import os
 import re
-import fnmatch
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional
 
 from .security import FileSystemPolicy
 from .file_handle import open_secure
