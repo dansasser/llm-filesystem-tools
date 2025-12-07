@@ -5,7 +5,7 @@ Provides routing and execution of tool calls from LLM responses.
 Handles parameter validation and error handling for seamless
 integration with function calling workflows.
 """
-from typing import Optional, Union
+from typing import Optional
 
 from .tools import FileSystemTools
 from .write_tools import FileSystemWriteTools
