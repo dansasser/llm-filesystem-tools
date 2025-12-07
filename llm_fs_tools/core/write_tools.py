@@ -10,7 +10,6 @@ Requires explicit permission via FileSystemPolicy(allow_write=True).
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 from .security import FileSystemPolicy
 from ..exceptions import SecurityError
