@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-fs-tools"
+version = "0.1.0"
+description = "Production-ready filesystem access tools for LLMs with TOCTOU protection"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [
+  {name = "Daniel T Sasser II"}
+]
+keywords = ["llm", "filesystem", "tools", "security", "ai", "function-calling"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: System :: Filesystems",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "black>=22.0",
+  "mypy>=1.0",
+  "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/dansasser/llm-filesystem-tools"
+Documentation = "https://github.com/dansasser/llm-filesystem-tools#readme"
+Repository = "https://github.com/dansasser/llm-filesystem-tools.git"
+Issues = "https://github.com/dansasser/llm-filesystem-tools/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["llm_fs_tools*"]
+exclude = ["test*", "tests*", "docs*", "examples*"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
