@@ -2,11 +2,11 @@
 
 **Secure filesystem access for Large Language Models with governance-first design.**
 
-[![PyPI version](https://badge.fury.io/py/llm-filesystem-tools.svg)](https://badge.fury.io/py/llm-filesystem-tools)
+[![PyPI version](https://badge.fury.io/py/llm-fs-tools.svg)](https://badge.fury.io/py/llm-fs-tools)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-Stop reinventing filesystem tools for every LLM project. `llm-filesystem-tools` provides production-ready, secure file operations that work with any LLM supporting function calling - Ollama, OpenAI, Anthropic, and more.
+Stop reinventing filesystem tools for every LLM project. `llm-fs-tools` provides production-ready, secure file operations that work with any LLM supporting function calling - Ollama, OpenAI, Anthropic, and more.
 
 ## The Problem
 
@@ -19,7 +19,7 @@ You want your AI assistant to analyze code, search files, or explore directories
 ## The Solution
 
 ```bash
-pip install llm-filesystem-tools
+pip install llm-fs-tools
 ```
 
 ```python
