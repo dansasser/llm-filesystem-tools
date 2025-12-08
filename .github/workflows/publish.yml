@@ -56,7 +56,17 @@ jobs:
 
       - name: Install from wheel
         run: |
-          pip install dist/*.whl
+          python - <<'PY'
+          import glob
+          import subprocess
+          import sys
+
+          wheels = glob.glob("dist/*.whl") + glob.glob("dist/**/*.whl", recursive=True)
+          if not wheels:
+              raise SystemExit("No wheel artifacts found in dist/")
+
+          subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", *wheels])
+          PY
 
       - name: Test import
         run: |
