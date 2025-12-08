@@ -134,7 +134,7 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
     # Convert to Python FD
     # Note: open_osfhandle transfers handle ownership to the FD
     # Closing the FD will also close the underlying Windows handle
-    fd = msvcrt.open_osfhandle(handle, flags)
+    fd = msvcrt.open_osfhandle(handle, flags)  # type: ignore[attr-defined]
 
     # Get canonical path using GetFinalPathNameByHandle
     path_buffer = ctypes.create_unicode_buffer(1024)
