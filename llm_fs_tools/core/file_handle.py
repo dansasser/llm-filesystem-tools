@@ -72,7 +72,7 @@ class SecureFileHandle:
         if hasattr(self, 'fd') and self.fd >= 0:
             try:
                 os.close(self.fd)
-            except:
+            except Exception:
                 pass
 
 

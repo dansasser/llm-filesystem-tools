@@ -9,6 +9,9 @@ from typing import Protocol, Tuple
 
 from ..exceptions import SecurityError
 
+# Fallback for platforms that don't define O_NOFOLLOW (e.g., Windows during type checking)
+O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+
 
 class SecureOpener(Protocol):
     """Protocol for platform-specific secure file opening"""
@@ -31,7 +34,7 @@ def secure_open_unix(path: Path, flags: int) -> Tuple[int, Path]:
     """
     # Open with O_NOFOLLOW - fails if path is symlink
     try:
-        fd = os.open(str(path), flags | os.O_NOFOLLOW)
+        fd = os.open(str(path), flags | O_NOFOLLOW)
     except OSError as e:
         if e.errno == errno.ELOOP:
             raise SecurityError(f"Symlink detected: {path}")
@@ -48,10 +51,10 @@ def secure_open_unix(path: Path, flags: int) -> Tuple[int, Path]:
 
         elif system == 'Darwin':
             # macOS - use fcntl F_GETPATH
-            import fcntl
+            import fcntl  # type: ignore[import-not-found]
             # macOS-specific constant
             F_GETPATH = 50
-            path_bytes = fcntl.fcntl(fd, F_GETPATH, bytes(1024))
+            path_bytes = fcntl.fcntl(fd, F_GETPATH, bytes(1024))  # type: ignore[attr-defined]
             real_path = path_bytes.rstrip(b'\x00').decode('utf-8')
             return fd, Path(real_path)
 
@@ -78,7 +81,7 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
     Works on: Windows 10+
     """
     import ctypes
-    import msvcrt
+    import msvcrt  # type: ignore
     from ctypes import wintypes
 
     # Windows API constants
@@ -89,7 +92,7 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
     FILE_ATTRIBUTE_REPARSE_POINT = 0x400
 
     # Open with FILE_FLAG_OPEN_REPARSE_POINT (doesn't follow symlinks)
-    kernel32 = ctypes.windll.kernel32
+    kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
     handle = kernel32.CreateFileW(
         str(path),
         GENERIC_READ,
@@ -131,7 +134,7 @@ def secure_open_windows(path: Path, flags: int) -> Tuple[int, Path]:
     # Convert to Python FD
     # Note: open_osfhandle transfers handle ownership to the FD
     # Closing the FD will also close the underlying Windows handle
-    fd = msvcrt.open_osfhandle(handle, flags)
+    fd = msvcrt.open_osfhandle(handle, flags)  # type: ignore[attr-defined]
 
     # Get canonical path using GetFinalPathNameByHandle
     path_buffer = ctypes.create_unicode_buffer(1024)

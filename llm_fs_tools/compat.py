@@ -314,7 +314,7 @@ def create_directory_tools(
         # Write-enabled policy
         policy = FileSystemPolicy(
             allowed_roots=[str(root_path)],
-            max_file_size_mb=max_file_size_mb,
+            max_file_size_mb=int(max_file_size_mb),
             max_directory_entries=max_directory_entries,
             blocked_patterns=blocked_patterns,
             blocked_extensions=blocked_extensions,
@@ -326,7 +326,7 @@ def create_directory_tools(
         # Read-only policy
         policy = FileSystemPolicy(
             allowed_roots=[str(root_path)],
-            max_file_size_mb=max_file_size_mb,
+            max_file_size_mb=int(max_file_size_mb),
             max_directory_entries=max_directory_entries,
             blocked_patterns=blocked_patterns,
             blocked_extensions=blocked_extensions

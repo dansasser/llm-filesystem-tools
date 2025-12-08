@@ -5,7 +5,7 @@ Provides routing and execution of tool calls from LLM responses.
 Handles parameter validation and error handling for seamless
 integration with function calling workflows.
 """
-from typing import Optional, Union
+from typing import Optional
 
 from .tools import FileSystemTools
 from .write_tools import FileSystemWriteTools
@@ -222,7 +222,7 @@ class ToolExecutor:
 
     def _check_type(self, value, expected_type: str) -> bool:
         """Check if value matches expected JSON schema type."""
-        type_map = {
+        type_map: dict[str, type | tuple[type, ...]] = {
             "string": str,
             "integer": int,
             "boolean": bool,

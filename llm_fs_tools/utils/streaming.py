@@ -9,7 +9,7 @@ Provides memory-efficient reading of large files with:
 """
 import os
 from pathlib import Path
-from typing import Iterator, Union
+from typing import Callable, Iterator, Union
 
 from ..core.security import FileSystemPolicy
 from ..core.file_handle import open_secure
@@ -207,7 +207,7 @@ class ChunkedProcessor:
     def process_file(
         self,
         path: Union[str, Path],
-        processor: callable,
+        processor: Callable[[str, int], object | None],
         encoding: str = 'utf-8'
     ) -> dict:
         """
@@ -261,7 +261,7 @@ class ChunkedProcessor:
     def process_lines(
         self,
         path: Union[str, Path],
-        processor: callable,
+        processor: Callable[[str, int], object | None],
         encoding: str = 'utf-8'
     ) -> dict:
         """
